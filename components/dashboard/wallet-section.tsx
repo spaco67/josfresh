@@ -8,8 +8,30 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+interface Transaction {
+  id: string;
+  amount: number;
+  type: string;
+  description: string;
+  createdAt: string;
+}
+
+interface Wallet {
+  id: string;
+  balance: number;
+  accountNumber: string;
+  accountName: string;
+  showBalance: boolean;
+  isVisible: boolean;
+  transactions: Transaction[];
+}
+
+interface TransactionHistoryProps {
+  transactions: Transaction[];
+}
+
 export function WalletSection() {
-  const [wallet, setWallet] = useState<any>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
   const [showTopUp, setShowTopUp] = useState(false);
 
@@ -43,10 +65,10 @@ export function WalletSection() {
   }, []);
 
   useEffect(() => {
-    const handleWalletUpdate = (event: CustomEvent<any>) => {
+    const handleWalletUpdate = (event: CustomEvent<Partial<Wallet>>) => {
       if (event.detail) {
         setWallet(prevWallet => ({
-          ...prevWallet,
+          ...prevWallet!,
           ...event.detail
         }));
       }
@@ -116,7 +138,9 @@ export function WalletSection() {
         onTopUp={() => setShowTopUp(true)}
       />
 
-      <TransactionHistory transactions={wallet.transactions || []} />
+      {wallet?.transactions && (
+        <TransactionHistory transactions={wallet.transactions} />
+      )}
 
       <TopUpModal
         open={showTopUp}
